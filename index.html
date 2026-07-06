@@ -45,7 +45,6 @@
             --radius-full: 999px;
             --nav-height: 64px;
             --bottom-nav-height: 64px;
-            --sticky-bar-height: 72px;
         }
 
         /* ============ RESET ============ */
@@ -971,7 +970,7 @@
             display: none;
             max-width: 1280px;
             margin: 0 auto;
-            padding: var(--space-3) var(--space-2) calc(var(--space-8) + var(--sticky-bar-height));
+            padding: var(--space-3) var(--space-2) calc(var(--space-8) + 16px);
         }
         @media(min-width:768px) {
             #productDetailPage {
@@ -1285,90 +1284,6 @@
             .detail-buy-now:hover {
                 background: #5a2228;
             }
-        }
-
-        /* ============ STICKY ADD TO CART BAR ============ */
-        .sticky-cart-bar {
-            position: fixed;
-            bottom: var(--bottom-nav-height);
-            left: 0;
-            right: 0;
-            z-index: 99;
-            background: rgba(255, 253, 251, 0.96);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border-top: 1px solid var(--line);
-            padding: 12px var(--space-2) max(12px, env(safe-area-inset-bottom));
-            transform: translateY(100%);
-            opacity: 0;
-            transition: transform 0.3s cubic-bezier(.2, .8, .2, 1), opacity 0.25s;
-            display: none;
-            align-items: center;
-            gap: var(--space-2);
-        }
-        .sticky-cart-bar.visible {
-            transform: translateY(0);
-            opacity: 1;
-        }
-        @media(min-width:768px) {
-            .sticky-cart-bar {
-                display: none !important;
-            }
-        }
-        .sticky-cart-bar .sticky-info {
-            flex: 1;
-            min-width: 0;
-        }
-        .sticky-cart-bar .sticky-name {
-            font-size: 0.85rem;
-            font-weight: 500;
-            color: var(--ink);
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        .sticky-cart-bar .sticky-price {
-            font-size: 0.85rem;
-            color: var(--ruby-deep);
-            font-weight: 600;
-        }
-        .sticky-cart-bar .sticky-btn {
-            background: var(--ruby);
-            color: #fff;
-            padding: 10px 20px;
-            border-radius: var(--radius-full);
-            font-size: 0.85rem;
-            font-weight: 600;
-            letter-spacing: 0.03em;
-            transition: all 0.2s;
-            border: none;
-            cursor: pointer;
-            flex-shrink: 0;
-            box-shadow: 0 4px 14px rgba(139, 58, 66, 0.3);
-            min-width: 100px;
-        }
-        .sticky-cart-bar .sticky-btn:active {
-            transform: scale(0.95);
-            background: var(--ruby-deep);
-        }
-        .sticky-cart-bar .sticky-buy-now {
-            background: var(--ruby-deep);
-            color: #fff;
-            padding: 10px 16px;
-            border-radius: var(--radius-full);
-            font-size: 0.8rem;
-            font-weight: 600;
-            letter-spacing: 0.03em;
-            transition: all 0.2s;
-            border: none;
-            cursor: pointer;
-            flex-shrink: 0;
-            box-shadow: 0 4px 14px rgba(110, 42, 48, 0.35);
-            min-width: 80px;
-        }
-        .sticky-cart-bar .sticky-buy-now:active {
-            transform: scale(0.95);
-            background: #5a2228;
         }
 
         /* ============ RECENTLY VIEWED ============ */
@@ -2202,16 +2117,6 @@
         </div>
     </nav>
 
-    <!-- STICKY ADD TO CART BAR (mobile) -->
-    <div class="sticky-cart-bar" id="stickyCartBar">
-        <div class="sticky-info">
-            <div class="sticky-name" id="stickyName">Product</div>
-            <div class="sticky-price" id="stickyPrice">0 EGP</div>
-        </div>
-        <button class="sticky-buy-now" id="stickyBuyNow">Buy now</button>
-        <button class="sticky-btn" id="stickyAddToCart">Add to cart</button>
-    </div>
-
     <div id="shopPage">
         <div id="homeSections">
             <div class="home-section">
@@ -2892,10 +2797,9 @@
                 if (left) left.addEventListener('click', () => row.scrollBy({ left: -260, behavior: 'smooth' }));
                 if (right) right.addEventListener('click', () => row.scrollBy({ left: 260, behavior: 'smooth' }));
             });
-            // recently viewed arrows
             const rl = document.getElementById('recentlyLeft'),
-                rr = document.getElementById('recentlyRight');
-            const rrow = document.getElementById('recentlyRow');
+                rr = document.getElementById('recentlyRight'),
+                rrow = document.getElementById('recentlyRow');
             if (rl) rl.addEventListener('click', () => rrow.scrollBy({ left: -260, behavior: 'smooth' }));
             if (rr) rr.addEventListener('click', () => rrow.scrollBy({ left: 260, behavior: 'smooth' }));
         }
@@ -2926,7 +2830,6 @@
             document.getElementById('productDetailPage').classList.remove('show');
             document.getElementById('shopPage').style.display = 'block';
             document.getElementById('trustStrip').style.display = 'block';
-            hideStickyBar();
             window.scrollTo(0, 0);
             setBottomNavActive('home');
             renderRecentlyViewed();
@@ -3011,8 +2914,7 @@
                     `<option value="${i}">${o.name} — ${o.price} EGP</option>`).join('');
                 detailPrice = product.priceOptions[0].price;
                 ts.onchange = () => { detailPrice = product.priceOptions[parseInt(ts.value)].price;
-                    updateDetailPrice();
-                    updateStickyBar(); };
+                    updateDetailPrice(); };
             } else { tc.style.display = 'none';
                 detailPrice = initPrice(product); }
 
@@ -3021,8 +2923,7 @@
             ss.disabled = product.sizes.length === 1;
             if (product.sizePrices) {
                 ss.onchange = () => { detailPrice = product.sizePrices[ss.value];
-                    updateDetailPrice();
-                    updateStickyBar(); };
+                    updateDetailPrice(); };
                 detailPrice = product.sizePrices[ss.value];
             }
             updateDetailPrice();
@@ -3044,8 +2945,6 @@
             window.scrollTo(0, 0);
 
             renderYouMayLike(product);
-            showStickyBar(product);
-            updateStickyBar();
         }
 
         function updateDetailPrice() {
@@ -3072,7 +2971,6 @@
                     currentSlide = 0;
                     renderSlider();
                 }
-                updateStickyBar();
             }));
         }
 
@@ -3086,7 +2984,6 @@
                 const first = document.querySelector(`.detail-color-swatch[data-color="${currentColor}"]`);
                 if (first) first.classList.add('selected');
             }
-            updateStickyBar();
         };
 
         // ============ SLIDER ============
@@ -3123,62 +3020,7 @@
             document.querySelectorAll('.slider-dot').forEach((d, i) => d.classList.toggle('active', i === currentSlide));
         }
 
-        // ============ STICKY BAR ============
-        function showStickyBar(p) {
-            const bar = document.getElementById('stickyCartBar');
-            if (window.innerWidth < 768) {
-                bar.style.display = 'flex';
-                setTimeout(() => bar.classList.add('visible'), 50);
-                document.getElementById('stickyName').textContent = p.name;
-                document.getElementById('stickyPrice').textContent = `${detailPrice.toLocaleString()} EGP`;
-            }
-        }
-
-        function hideStickyBar() {
-            const bar = document.getElementById('stickyCartBar');
-            bar.classList.remove('visible');
-            setTimeout(() => { bar.style.display = 'none'; }, 300);
-        }
-
-        function updateStickyBar() {
-            if (!currentDetailProduct) return;
-            const bar = document.getElementById('stickyCartBar');
-            if (bar.style.display === 'none' || !bar.classList.contains('visible')) return;
-            document.getElementById('stickyPrice').textContent = `${detailPrice.toLocaleString()} EGP`;
-        }
-
-        document.getElementById('stickyAddToCart').addEventListener('click', () => {
-            const p = currentDetailProduct;
-            if (!p) return;
-            const size = document.getElementById('detailSizeSelect').value;
-            const color = isCustom ? 'Customized' : COLORS[currentColor].name;
-            const img = slideImgs[currentSlide] || slideImgs[0];
-            const notes = isCustom ? document.getElementById('customizationNotes').value : '';
-            let type = null;
-            if (p.priceOptions) { const ts = document.getElementById('detailTypeSelect');
-                type = p.priceOptions[parseInt(ts.value)].name; }
-            addToCart(p.id, size, color, img, notes, detailPrice, type);
-            const btn = document.getElementById('stickyAddToCart');
-            btn.textContent = '✓ Added!';
-            btn.style.background = 'var(--ruby-deep)';
-            setTimeout(() => { btn.textContent = 'Add to cart';
-                btn.style.background = ''; }, 1500);
-        });
-
-        document.getElementById('stickyBuyNow').addEventListener('click', () => {
-            const p = currentDetailProduct;
-            if (!p) return;
-            const size = document.getElementById('detailSizeSelect').value;
-            const color = isCustom ? 'Customized' : COLORS[currentColor].name;
-            const img = slideImgs[currentSlide] || slideImgs[0];
-            const notes = isCustom ? document.getElementById('customizationNotes').value : '';
-            let type = null;
-            if (p.priceOptions) { const ts = document.getElementById('detailTypeSelect');
-                type = p.priceOptions[parseInt(ts.value)].name; }
-            addToCart(p.id, size, color, img, notes, detailPrice, type);
-            openCart();
-        });
-
+        // Add to cart & buy now actions – these use the detail page buttons only, sticky bar removed.
         document.getElementById('detailBuyNowBtn').addEventListener('click', () => {
             const p = currentDetailProduct;
             if (!p) return;
@@ -3297,7 +3139,6 @@
             document.getElementById('productDetailPage').classList.remove('show');
             document.getElementById('shopPage').style.display = 'block';
             document.getElementById('trustStrip').style.display = 'block';
-            hideStickyBar();
             if (state.view === 'category') document.getElementById('categoryProductsPage').classList.add('show');
             else document.getElementById('homeSections').style.display = 'block';
             renderRecentlyViewed();
@@ -3363,22 +3204,6 @@
                     .querySelector('.skeleton')) addSkeleton(img);
             });
         }).observe(document.body, { childList: true, subtree: true });
-
-        // Handle resize for sticky bar
-        let resizeTimer;
-        window.addEventListener('resize', () => {
-            clearTimeout(resizeTimer);
-            resizeTimer = setTimeout(() => {
-                if (currentDetailProduct && window.innerWidth >= 768) {
-                    hideStickyBar();
-                } else if (currentDetailProduct && window.innerWidth < 768) {
-                    const bar = document.getElementById('stickyCartBar');
-                    if (bar.style.display === 'none') {
-                        showStickyBar(currentDetailProduct);
-                    }
-                }
-            }, 200);
-        });
     </script>
 </body>
 </html>
