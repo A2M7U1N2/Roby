@@ -3381,5 +3381,49 @@ onValue(productsRef, (snapshot) => {
             });
         }).observe(document.body, { childList: true, subtree: true });
     </script>
+    <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyDAngLmOVnVsT89QnPyDngMzl1GylCsUzo",
+        authDomain: "rubies-eg.firebaseapp.com",
+        databaseURL: "https://rubies-eg-default-rtdb.firebaseio.com",
+        projectId: "rubies-eg",
+        storageBucket: "rubies-eg.firebasestorage.app",
+        messagingSenderId: "355806127285",
+        appId: "1:355806127285:web:3b9d735a02addb7678cafc",
+        measurementId: "G-GR31EYR7MR"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const productsRef = ref(db, 'products');
+
+    onValue(productsRef, (snapshot) => {
+        const data = snapshot.val();
+        
+        // التأكد من تفريغ وتحديث المصفوفة الأصلية المستخدمة في الدوال مباشرة
+        if (typeof PRODUCTS !== 'undefined') {
+            PRODUCTS.length = 0; // تفريغ المصفوفة القديمة بدون كسر الـ Reference
+            if (data) {
+                PRODUCTS.push(...Object.values(data)); // ضخ الداتا الجديدة جواها
+            }
+        } else {
+            window.PRODUCTS = data ? Object.values(data) : [];
+        }
+
+        // تشغيل الدوال الأصلية لتحديث الشاشة فوراً
+        if (typeof loadCart === "function") loadCart();
+        if (typeof loadWishlist === "function") loadWishlist();
+        if (typeof loadRecentlyViewed === "function") loadRecentlyViewed();
+        if (typeof renderCart === "function") renderCart();
+        if (typeof updateWishlistUI === "function") updateWishlistUI();
+        if (typeof updateBadges === "function") updateBadges();
+        if (typeof renderHome === "function") renderHome();
+        if (typeof setupArrows === "function") setupArrows();
+        if (typeof renderCategoryList === "function") renderCategoryList();
+    });
+</script>
 </body>
 </html>
